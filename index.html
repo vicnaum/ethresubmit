@@ -6,9 +6,17 @@ ETH Transaction Replace/Resubmit
 </title>
 </head>
 <body>
+<h1>ETH Replacer</h1>
+<p>Replace any Pending ETH transaction with a SELF 0 value one (i.e. try to cancel it)</p>
+<p>You will need a fork of MetaMask with <a href="https://github.com/MetaMask/metamask-extension/pull/2679">#2679 Issue</a> fixed. Ask MetaMask developers to merge the fix to production.</p>
+<hr/>
+<p>Just put a Pending Tx nonce in the field below, and fill the new desired amount of gas (the more - the better) - and click "Resubmit!"</p>
+<br/><br/><br/>
 <div id='console'></div>
-<button onclick="reset()">Refresh</button><br/><hr/>
+<button onclick="reset()">Refresh</button><br/>
 
+<br/><br/>
+<hr/>
 Nonce: <input id="nonce"/> --- Gas: <input id="gas" value="60"/> GWei <br/><br/>
 <button onclick="resubmit()">Resubmit!</button>
 </body>
@@ -41,12 +49,12 @@ function reset() {
 function init() {
 	user = web3.eth.accounts[0];
 		c.log(`User: ${user}`);
-	web3.eth.getTransactionCount(user, "pending", (err, nonce) => {
-		c.log(`Pending Nonce: ${nonce-1}`);
-		document.getElementById("nonce").value = nonce-1;
+	web3.eth.getTransactionCount(user, "pending", (err, pending) => {
+		c.log(`Pending Nonce: ${pending-1}`);
+		document.getElementById("nonce").value = pending-1;
 	})
-	web3.eth.getTransactionCount(user, "latest", (err, nonce) => {
-		c.log(`Mined Nonce: ${nonce-1}`);
+	web3.eth.getTransactionCount(user, "latest", (err, mined) => {
+		c.log(`Mined Nonce: ${mined-1}`);
 	})
 }
 
@@ -67,7 +75,7 @@ function resubmit() {
 		gasPrice: gasPrice,
 		gas: '21000',
 	}, (error, result) => {
-		c.log(error, result)
+		c.log(result)
 	});
 }
 
