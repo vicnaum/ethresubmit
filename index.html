@@ -1,0 +1,88 @@
+<html>
+<body>
+<div id='console'></div>
+<button onclick="reset()">Refresh</button><br/><hr/>
+
+Nonce: <input id="nonce"/> --- Gas: <input id="gas" value="60"/> GWei <br/><br/>
+<button onclick="resubmit()">Resubmit!</button>
+</body>
+
+<script>
+/* console.log function from: http://www.kobashicomputing.com/send-your-console-output-to-the-result-pane-in-jsfiddle */
+var c = function() {
+    return({
+        log: function(msg) {
+          consoleDiv = document.getElementById('console');
+          para = document.createElement('p');
+          text = document.createTextNode(msg);
+          para.appendChild(text);
+          consoleDiv.appendChild(para);
+        },
+        cls: function(msg) {
+          consoleDiv = document.getElementById('console');
+          consoleDiv.innerHTML='';
+        }
+    });
+}();
+
+var user;
+
+function reset() {
+	c.cls()
+	init()
+}
+
+function init() {
+	user = web3.eth.accounts[0];
+		c.log(`User: ${user}`);
+	web3.eth.getTransactionCount(user, "pending", (err, nonce) => {
+		c.log(`Pending Nonce: ${nonce-1}`);
+		document.getElementById("nonce").value = nonce-1;
+	})
+	web3.eth.getTransactionCount(user, "latest", (err, nonce) => {
+		c.log(`Mined Nonce: ${nonce-1}`);
+	})
+}
+
+function resubmit() {
+
+	user = web3.eth.accounts[0];
+	var nonce = document.getElementById("nonce").value;
+	c.log(`nonce: ${nonce}`)
+	var gasPrice = web3.toWei(document.getElementById("gas").value, "gwei");
+	c.log(`gasPrice: ${gasPrice}`)
+
+	
+	web3.eth.sendTransaction({
+		from: user,
+		to: user,
+		value: 0,
+		nonce: nonce,
+		gasPrice: gasPrice,
+		gas: '21000',
+	}, (error, result) => {
+		c.log(error, result)
+	});
+}
+
+window.addEventListener('load', function() {
+
+  // Checking if Web3 has been injected by the browser (Mist/MetaMask)
+  if (typeof web3 !== 'undefined') {
+    // Use Mist/MetaMask's provider
+    window.web3 = new Web3(web3.currentProvider);
+  } else {
+    console.log('No web3? You should consider trying MetaMask!')
+    // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
+    window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+  }
+
+  // Now you can start your app & access web3 freely:
+  
+  setTimeout(init, 500)
+
+})
+
+</script>
+
+</html>
